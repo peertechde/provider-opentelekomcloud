@@ -23,6 +23,7 @@ import (
 	apisv1alpha1 "github.com/peertechde/provider-opentelekomcloud/apis/v1alpha1"
 	v1alpha1 "github.com/peertechde/provider-opentelekomcloud/apis/vpc/v1alpha1"
 	clients "github.com/peertechde/provider-opentelekomcloud/internal/clients"
+	"github.com/peertechde/provider-opentelekomcloud/internal/pointer"
 )
 
 const (
@@ -173,7 +174,6 @@ type external struct {
 	client *golangsdk.ServiceClient
 }
 
-//nolint:gocyclo
 func (e *external) Observe(
 	ctx context.Context,
 	mg resource.Managed,
@@ -216,24 +216,26 @@ func (e *external) Observe(
 		cr.SetConditions(xpv1.Unavailable())
 	}
 
-	// Drift detection
-	upToDate := true // nolint:staticcheck
-	if vpc.Name != cr.Spec.ForProvider.Name {
-		upToDate = false
-	}
-	if vpc.CIDR != cr.Spec.ForProvider.CIDR {
-		upToDate = false
-	}
-	if cr.Spec.ForProvider.Description != nil {
-		if vpc.Description != *cr.Spec.ForProvider.Description {
-			upToDate = false
-		}
-	}
+	needsUpdate := e.detectDrift(&cr.Spec.ForProvider, vpc)
 
 	return managed.ExternalObservation{
 		ResourceExists:   true,
-		ResourceUpToDate: upToDate,
+		ResourceUpToDate: !needsUpdate,
 	}, nil
+}
+
+func (e *external) detectDrift(spec *v1alpha1.VPCParameters, actual *vpcs.Vpc) bool {
+	if actual.Name != spec.Name {
+		return true
+	}
+	if actual.CIDR != spec.CIDR {
+		return true
+	}
+	if pointer.Deref(spec.Description, actual.Description) != actual.Description {
+		return true
+	}
+
+	return false
 }
 
 func (e *external) Create(
