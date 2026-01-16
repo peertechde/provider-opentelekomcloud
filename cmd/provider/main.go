@@ -1,19 +1,3 @@
-/*
-Copyright 2025 The Crossplane Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package main
 
 import (
@@ -44,31 +28,54 @@ import (
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"github.com/crossplane/provider-template/apis"
-	template "github.com/crossplane/provider-template/internal/controller"
-	"github.com/crossplane/provider-template/internal/version"
+	"github.com/peertechde/provider-opentelekomcloud/apis"
+	opentelekomcloud "github.com/peertechde/provider-opentelekomcloud/internal/controller"
+	"github.com/peertechde/provider-opentelekomcloud/internal/version"
 )
 
 func main() {
 	var (
-		app            = kingpin.New(filepath.Base(os.Args[0]), "Template support for Crossplane.").DefaultEnvars()
+		app = kingpin.New(filepath.Base(os.Args[0]), "OpenTelekomCloud support for Crossplane.").
+			DefaultEnvars()
 		debug          = app.Flag("debug", "Run with debug logging.").Short('d').Bool()
-		leaderElection = app.Flag("leader-election", "Use leader election for the controller manager.").Short('l').Default("false").Envar("LEADER_ELECTION").Bool()
+		leaderElection = app.Flag("leader-election", "Use leader election for the controller manager.").
+				Short('l').
+				Default("false").
+				Envar("LEADER_ELECTION").
+				Bool()
 
-		syncInterval            = app.Flag("sync", "How often all resources will be double-checked for drift from the desired state.").Short('s').Default("1h").Duration()
-		pollInterval            = app.Flag("poll", "How often individual resources will be checked for drift from the desired state").Default("1m").Duration()
-		pollStateMetricInterval = app.Flag("poll-state-metric", "State metric recording interval").Default("5s").Duration()
+		syncInterval = app.Flag("sync", "How often all resources will be double-checked for drift from the desired state.").
+				Short('s').
+				Default("1h").
+				Duration()
+		pollInterval = app.Flag("poll", "How often individual resources will be checked for drift from the desired state").
+				Default("1m").
+				Duration()
+		pollStateMetricInterval = app.Flag("poll-state-metric", "State metric recording interval").
+					Default("5s").
+					Duration()
 
-		maxReconcileRate = app.Flag("max-reconcile-rate", "The global maximum rate per second at which resources may checked for drift from the desired state.").Default("10").Int()
+		maxReconcileRate = app.Flag("max-reconcile-rate", "The global maximum rate per second at which resources may checked for drift from the desired state.").
+					Default("10").
+					Int()
 
-		enableManagementPolicies = app.Flag("enable-management-policies", "Enable support for Management Policies.").Default("true").Envar("ENABLE_MANAGEMENT_POLICIES").Bool()
-		enableChangeLogs         = app.Flag("enable-changelogs", "Enable support for capturing change logs during reconciliation.").Default("false").Envar("ENABLE_CHANGE_LOGS").Bool()
-		changelogsSocketPath     = app.Flag("changelogs-socket-path", "Path for changelogs socket (if enabled)").Default("/var/run/changelogs/changelogs.sock").Envar("CHANGELOGS_SOCKET_PATH").String()
+		enableManagementPolicies = app.Flag("enable-management-policies", "Enable support for Management Policies.").
+						Default("true").
+						Envar("ENABLE_MANAGEMENT_POLICIES").
+						Bool()
+		enableChangeLogs = app.Flag("enable-changelogs", "Enable support for capturing change logs during reconciliation.").
+					Default("false").
+					Envar("ENABLE_CHANGE_LOGS").
+					Bool()
+		changelogsSocketPath = app.Flag("changelogs-socket-path", "Path for changelogs socket (if enabled)").
+					Default("/var/run/changelogs/changelogs.sock").
+					Envar("CHANGELOGS_SOCKET_PATH").
+					String()
 	)
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 
 	zl := zap.New(zap.UseDevMode(*debug))
-	log := logging.NewLogrLogger(zl.WithName("provider-template"))
+	log := logging.NewLogrLogger(zl.WithName("provider-opentelekomcloud"))
 	if *debug {
 		// The controller-runtime is *very* verbose even at info level, so we only
 		// provide it a real logger when we're running in debug mode.
@@ -98,15 +105,21 @@ func main() {
 		// server. Switching to Leases only and longer leases appears to
 		// alleviate this.
 		LeaderElection:             *leaderElection,
-		LeaderElectionID:           "crossplane-leader-election-provider-template",
+		LeaderElectionID:           "crossplane-leader-election-provider-opentelekomcloud",
 		LeaderElectionResourceLock: resourcelock.LeasesResourceLock,
 		LeaseDuration:              func() *time.Duration { d := 60 * time.Second; return &d }(),
 		RenewDeadline:              func() *time.Duration { d := 50 * time.Second; return &d }(),
 	})
 	kingpin.FatalIfError(err, "Cannot create controller manager")
 
-	kingpin.FatalIfError(apis.AddToScheme(mgr.GetScheme()), "Cannot add Template APIs to scheme")
-	kingpin.FatalIfError(apiextensionsv1.AddToScheme(mgr.GetScheme()), "Cannot add CustomResourceDefinition to scheme")
+	kingpin.FatalIfError(
+		apis.AddToScheme(mgr.GetScheme()),
+		"Cannot add OpenTelekomCloud APIs to scheme",
+	)
+	kingpin.FatalIfError(
+		apiextensionsv1.AddToScheme(mgr.GetScheme()),
+		"Cannot add CustomResourceDefinition to scheme",
+	)
 
 	metricRecorder := managed.NewMRMetricRecorder()
 	stateMetrics := statemetrics.NewMRStateMetrics()
@@ -137,18 +150,31 @@ func main() {
 		o.Features.Enable(feature.EnableAlphaChangeLogs)
 		log.Info("Alpha feature enabled", "flag", feature.EnableAlphaChangeLogs)
 
-		conn, err := grpc.NewClient("unix://"+*changelogsSocketPath, grpc.WithTransportCredentials(insecure.NewCredentials()))
-		kingpin.FatalIfError(err, "failed to create change logs client connection at %s", *changelogsSocketPath)
+		conn, err := grpc.NewClient(
+			"unix://"+*changelogsSocketPath,
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+		kingpin.FatalIfError(
+			err,
+			"failed to create change logs client connection at %s",
+			*changelogsSocketPath,
+		)
 
 		clo := controller.ChangeLogOptions{
 			ChangeLogger: managed.NewGRPCChangeLogger(
 				changelogsv1alpha1.NewChangeLogServiceClient(conn),
-				managed.WithProviderVersion(fmt.Sprintf("provider-template:%s", version.Version))),
+				managed.WithProviderVersion(
+					fmt.Sprintf("provider-opentelekomcloud:%s", version.Version),
+				),
+			),
 		}
 		o.ChangeLogOptions = &clo
 	}
 
 	kingpin.FatalIfError(customresourcesgate.Setup(mgr, o), "Cannot setup CRD gate controller")
-	kingpin.FatalIfError(template.SetupGated(mgr, o), "Cannot setup Template controllers")
+	kingpin.FatalIfError(
+		opentelekomcloud.SetupGated(mgr, o),
+		"Cannot setup OpenTelekomCloud controllers",
+	)
 	kingpin.FatalIfError(mgr.Start(ctrl.SetupSignalHandler()), "Cannot start controller manager")
 }

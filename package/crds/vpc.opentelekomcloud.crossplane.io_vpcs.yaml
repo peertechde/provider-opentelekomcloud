@@ -4,18 +4,18 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  name: mytypes.sample.template.crossplane.io
+  name: vpcs.vpc.opentelekomcloud.crossplane.io
 spec:
-  group: sample.template.crossplane.io
+  group: vpc.opentelekomcloud.crossplane.io
   names:
     categories:
     - crossplane
     - managed
-    - template
-    kind: MyType
-    listKind: MyTypeList
-    plural: mytypes
-    singular: mytype
+    - opentelekomcloud
+    kind: VPC
+    listKind: VPCList
+    plural: vpcs
+    singular: vpc
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
@@ -25,8 +25,14 @@ spec:
     - jsonPath: .status.conditions[?(@.type=='Synced')].status
       name: SYNCED
       type: string
-    - jsonPath: .metadata.annotations.crossplane\.io/external-name
-      name: EXTERNAL-NAME
+    - jsonPath: .status.atProvider.id
+      name: ID
+      type: string
+    - jsonPath: .spec.forProvider.cidr
+      name: CIDR
+      type: string
+    - jsonPath: .status.atProvider.status
+      name: STATUS
       type: string
     - jsonPath: .metadata.creationTimestamp
       name: AGE
@@ -34,7 +40,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: A MyType is an example API type.
+        description: VPC is the Schema for the VPC API.
         properties:
           apiVersion:
             description: |-
@@ -54,15 +60,34 @@ spec:
           metadata:
             type: object
           spec:
-            description: A MyTypeSpec defines the desired state of a MyType.
+            description: A VPCSpec defines the desired state of a VPC.
             properties:
               forProvider:
-                description: MyTypeParameters are the configurable fields of a MyType.
+                description: VPCParameters are the configurable fields of a VPC.
                 properties:
-                  configurableField:
+                  cidr:
+                    description: |-
+                      CIDR is the range of available subnets in the VPC.
+                      The value must be in CIDR format, for example, 192.168.0.0/16.
+                    type: string
+                    x-kubernetes-validations:
+                    - message: CIDR is immutable
+                      rule: self == oldSelf
+                  description:
+                    description: Description provides supplementary information about
+                      the VPC.
+                    maxLength: 255
+                    type: string
+                  name:
+                    description: |-
+                      Name is the name of the VPC. The name must be unique for a tenant.
+                      The value is a string of no more than 64 characters and can contain
+                      digits, letters, underscores (_), and hyphens (-).
+                    maxLength: 64
                     type: string
                 required:
-                - configurableField
+                - cidr
+                - name
                 type: object
               managementPolicies:
                 default:
@@ -123,17 +148,22 @@ spec:
             - forProvider
             type: object
           status:
-            description: A MyTypeStatus represents the observed state of a MyType.
+            description: A VPCStatus represents the observed state of a VPC.
             properties:
               atProvider:
-                description: MyTypeObservation are the observable fields of a MyType.
+                description: VPCObservation are the observable fields of a VPC.
                 properties:
-                  configurableField:
+                  cidr:
+                    description: CIDR is the actual CIDR block of the VPC.
                     type: string
-                  observableField:
+                  id:
+                    description: ID is the unique identifier of the VPC.
                     type: string
-                required:
-                - configurableField
+                  status:
+                    description: |-
+                      Status indicates the VPC status. Values can be CREATING, OK, DOWN,
+                      PENDING_UPDATE, PENDING_DELETE, or ERROR.
+                    type: string
                 type: object
               conditions:
                 description: Conditions of the resource.

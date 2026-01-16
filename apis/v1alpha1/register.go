@@ -9,7 +9,7 @@ import (
 
 // Package type metadata.
 const (
-	Group   = "template.crossplane.io"
+	Group   = "opentelekomcloud.crossplane.io"
 	Version = "v1alpha1"
 )
 
@@ -23,8 +23,11 @@ var (
 
 // ProviderConfig type metadata.
 var (
-	ProviderConfigKind             = reflect.TypeOf(ProviderConfig{}).Name()
-	ProviderConfigGroupKind        = schema.GroupKind{Group: Group, Kind: ProviderConfigKind}.String()
+	ProviderConfigKind      = reflect.TypeOf(ProviderConfig{}).Name()
+	ProviderConfigGroupKind = schema.GroupKind{
+		Group: Group,
+		Kind:  ProviderConfigKind,
+	}.String()
 	ProviderConfigGroupVersionKind = SchemeGroupVersion.WithKind(ProviderConfigKind)
 )
 
@@ -34,23 +37,33 @@ var (
 	ProviderConfigUsageGroupVersionKind = SchemeGroupVersion.WithKind(ProviderConfigUsageKind)
 
 	ProviderConfigUsageListKind             = reflect.TypeOf(ProviderConfigUsageList{}).Name()
-	ProviderConfigUsageListGroupVersionKind = SchemeGroupVersion.WithKind(ProviderConfigUsageListKind)
+	ProviderConfigUsageListGroupVersionKind = SchemeGroupVersion.WithKind(
+		ProviderConfigUsageListKind,
+	)
 )
 
 // ClusterProviderConfig type metadata
 var (
-	ClusterProviderConfigKind             = reflect.TypeOf(ClusterProviderConfig{}).Name()
-	ClusterProviderConfigGroupKind        = schema.GroupKind{Group: Group, Kind: ClusterProviderConfigKind}.String()
+	ClusterProviderConfigKind      = reflect.TypeOf(ClusterProviderConfig{}).Name()
+	ClusterProviderConfigGroupKind = schema.GroupKind{
+		Group: Group,
+		Kind:  ClusterProviderConfigKind,
+	}.String()
 	ClusterProviderConfigGroupVersionKind = SchemeGroupVersion.WithKind(ClusterProviderConfigKind)
 )
 
 // ClusterProviderConfigUsage type metadata.
 var (
 	ClusterProviderConfigUsageKind             = reflect.TypeOf(ClusterProviderConfigUsage{}).Name()
-	ClusterProviderConfigUsageGroupVersionKind = SchemeGroupVersion.WithKind(ClusterProviderConfigUsageKind)
+	ClusterProviderConfigUsageGroupVersionKind = SchemeGroupVersion.WithKind(
+		ClusterProviderConfigUsageKind,
+	)
 
-	ClusterProviderConfigUsageListKind             = reflect.TypeOf(ClusterProviderConfigUsageList{}).Name()
-	ClusterProviderConfigUsageListGroupVersionKind = SchemeGroupVersion.WithKind(ClusterProviderConfigUsageListKind)
+	ClusterProviderConfigUsageListKind = reflect.TypeOf(ClusterProviderConfigUsageList{}).
+						Name()
+	ClusterProviderConfigUsageListGroupVersionKind = SchemeGroupVersion.WithKind(
+		ClusterProviderConfigUsageListKind,
+	)
 )
 
 func init() {

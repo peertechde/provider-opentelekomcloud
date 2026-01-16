@@ -1,4 +1,4 @@
-module github.com/crossplane/provider-template
+module github.com/peertechde/provider-opentelekomcloud
 
 go 1.24.0
 
@@ -12,6 +12,7 @@ require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/crossplane/crossplane-runtime/v2 v2.0.0
 	github.com/google/go-cmp v0.7.0
+	github.com/opentelekomcloud/gophertelekomcloud v0.9.5
 	github.com/pkg/errors v0.9.1
 	google.golang.org/grpc v1.74.2
 	k8s.io/apiextensions-apiserver v0.33.0

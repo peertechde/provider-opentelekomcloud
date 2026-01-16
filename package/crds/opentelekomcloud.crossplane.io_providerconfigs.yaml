@@ -4,14 +4,14 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  name: providerconfigs.template.crossplane.io
+  name: providerconfigs.opentelekomcloud.crossplane.io
 spec:
-  group: template.crossplane.io
+  group: opentelekomcloud.crossplane.io
   names:
     categories:
     - crossplane
     - provider
-    - template
+    - opentelekomcloud
     kind: ProviderConfig
     listKind: ProviderConfigList
     plural: providerconfigs
@@ -107,8 +107,25 @@ spec:
                 required:
                 - source
                 type: object
+              domainName:
+                description: DomainName is the OpenStack domain name.
+                type: string
+              identityEndpoint:
+                description: |-
+                  IdentityEndpoint is the OpenStack identity endpoint.
+                  Defaults to OTC public endpoint if not specified.
+                type: string
+              projectId:
+                description: ProjectID is the OpenStack project/tenant id.
+                type: string
+              region:
+                description: Region is the OpenStack region (e.g., "eu-de").
+                type: string
             required:
             - credentials
+            - domainName
+            - projectId
+            - region
             type: object
           status:
             description: A ProviderConfigStatus defines the status of a Provider.
