@@ -23,6 +23,7 @@ import (
 	v1alpha1 "github.com/peertechde/provider-opentelekomcloud/apis/subnet/v1alpha1"
 	apisv1alpha1 "github.com/peertechde/provider-opentelekomcloud/apis/v1alpha1"
 	clients "github.com/peertechde/provider-opentelekomcloud/internal/clients"
+	"github.com/peertechde/provider-opentelekomcloud/internal/pointer"
 )
 
 const (
@@ -173,7 +174,6 @@ type external struct {
 	client *golangsdk.ServiceClient
 }
 
-//nolint:gocyclo
 func (e *external) Observe(
 	ctx context.Context,
 	mg resource.Managed,
@@ -215,62 +215,68 @@ func (e *external) Observe(
 		cr.SetConditions(xpv1.Unavailable())
 	}
 
-	// Late initialization
-	var lateInitialized bool // false
-	if cr.Spec.ForProvider.DHCPEnable == nil {
-		cr.Spec.ForProvider.DHCPEnable = &subnet.EnableDHCP
-		lateInitialized = true
-	}
-	if cr.Spec.ForProvider.PrimaryDNS == nil && subnet.PrimaryDNS != "" {
-		cr.Spec.ForProvider.PrimaryDNS = &subnet.PrimaryDNS
-		lateInitialized = true
-	}
-	if cr.Spec.ForProvider.SecondaryDNS == nil && subnet.SecondaryDNS != "" {
-		cr.Spec.ForProvider.SecondaryDNS = &subnet.SecondaryDNS
-		lateInitialized = true
-	}
-	if cr.Spec.ForProvider.Description == nil && subnet.Description != "" {
-		cr.Spec.ForProvider.Description = &subnet.Description
-		lateInitialized = true
-	}
-
-	// Drift detection
-	upToDate := true // nolint:staticcheck
-	if subnet.Name != cr.Spec.ForProvider.Name {
-		upToDate = false
-	}
-	if subnet.CIDR != cr.Spec.ForProvider.CIDR {
-		upToDate = false
-	}
-	if subnet.GatewayIP != cr.Spec.ForProvider.GatewayIP {
-		upToDate = false
-	}
-	if cr.Spec.ForProvider.DHCPEnable != nil {
-		if subnet.EnableDHCP != *cr.Spec.ForProvider.DHCPEnable {
-			upToDate = false
-		}
-	}
-	if cr.Spec.ForProvider.Description != nil {
-		if subnet.Description != *cr.Spec.ForProvider.Description {
-			upToDate = false
-		}
-	}
-	if cr.Spec.ForProvider.PrimaryDNS != nil {
-		if subnet.PrimaryDNS != *cr.Spec.ForProvider.PrimaryDNS {
-			upToDate = false
-		}
-	}
-	if cr.Spec.ForProvider.SecondaryDNS != nil {
-		if subnet.SecondaryDNS != *cr.Spec.ForProvider.SecondaryDNS {
-			upToDate = false
-		}
-	}
+	lateInitialized := e.detectLateInitialization(&cr.Spec.ForProvider, subnet)
+	needsUpdate := e.detectDrift(&cr.Spec.ForProvider, subnet)
 
 	return managed.ExternalObservation{
 		ResourceExists:          true,
-		ResourceUpToDate:        upToDate,
+		ResourceUpToDate:        !needsUpdate,
 		ResourceLateInitialized: lateInitialized,
 	}, nil
+}
+
+// detectLateInitialization fills optional Spec fields if they are empty but present at the provider.
+func (e *external) detectLateInitialization(
+	spec *v1alpha1.SubnetParameters,
+	actual *subnets.Subnet,
+) bool {
+	var initialized bool // false
+
+	if spec.DHCPEnable == nil {
+		spec.DHCPEnable = pointer.To(actual.EnableDHCP)
+		initialized = true
+	}
+
+	if spec.PrimaryDNS == nil && actual.PrimaryDNS != "" {
+		spec.PrimaryDNS = pointer.To(actual.PrimaryDNS)
+		initialized = true
+	}
+	if spec.SecondaryDNS == nil && actual.SecondaryDNS != "" {
+		spec.SecondaryDNS = pointer.To(actual.SecondaryDNS)
+		initialized = true
+	}
+	if spec.Description == nil && actual.Description != "" {
+		spec.Description = pointer.To(actual.Description)
+		initialized = true
+	}
+
+	return initialized
+}
+
+func (e *external) detectDrift(spec *v1alpha1.SubnetParameters, actual *subnets.Subnet) bool {
+	if actual.Name != spec.Name {
+		return true
+	}
+	if actual.CIDR != spec.CIDR {
+		return true
+	}
+	if actual.GatewayIP != spec.GatewayIP {
+		return true
+	}
+	if pointer.Deref(spec.Description, actual.Description) != actual.Description {
+		return true
+	}
+	if pointer.Deref(spec.DHCPEnable, actual.EnableDHCP) != actual.EnableDHCP {
+		return true
+	}
+	if pointer.Deref(spec.PrimaryDNS, actual.PrimaryDNS) != actual.PrimaryDNS {
+		return true
+	}
+	if pointer.Deref(spec.SecondaryDNS, actual.SecondaryDNS) != actual.SecondaryDNS {
+		return true
+	}
+
+	return false
 }
 
 func (e *external) Create(
