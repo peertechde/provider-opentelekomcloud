@@ -160,9 +160,7 @@ spec:
                     description: ID is the unique identifier of the VPC.
                     type: string
                   status:
-                    description: |-
-                      Status indicates the VPC status. Values can be CREATING, OK, DOWN,
-                      PENDING_UPDATE, PENDING_DELETE, or ERROR.
+                    description: Status indicates the current status of the VPC.
                     type: string
                 type: object
               conditions:

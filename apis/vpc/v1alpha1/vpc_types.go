@@ -36,8 +36,7 @@ type VPCObservation struct {
 	// ID is the unique identifier of the VPC.
 	ID string `json:"id,omitempty"`
 
-	// Status indicates the VPC status. Values can be CREATING, OK, DOWN,
-	// PENDING_UPDATE, PENDING_DELETE, or ERROR.
+	// Status indicates the current status of the VPC.
 	Status string `json:"status,omitempty"`
 
 	// CIDR is the actual CIDR block of the VPC.
