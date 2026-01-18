@@ -5,6 +5,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/peertechde/provider-opentelekomcloud/internal/controller/config"
+	"github.com/peertechde/provider-opentelekomcloud/internal/controller/natgateway"
 	"github.com/peertechde/provider-opentelekomcloud/internal/controller/securitygroup"
 	"github.com/peertechde/provider-opentelekomcloud/internal/controller/securitygrouprule"
 	"github.com/peertechde/provider-opentelekomcloud/internal/controller/subnet"
@@ -20,6 +21,7 @@ func SetupGated(mgr ctrl.Manager, o controller.Options) error {
 		subnet.SetupGated,
 		securitygroup.SetupGated,
 		securitygrouprule.SetupGated,
+		natgateway.SetupGated,
 	} {
 		if err := setup(mgr, o); err != nil {
 			return err
