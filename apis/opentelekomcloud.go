@@ -4,6 +4,7 @@ package apis
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
+	elasticipv1alpha1 "github.com/peertechde/provider-opentelekomcloud/apis/elasticip/v1alpha1"
 	natgatewayv1alpha1 "github.com/peertechde/provider-opentelekomcloud/apis/natgateway/v1alpha1"
 	securitygroupv1alpha1 "github.com/peertechde/provider-opentelekomcloud/apis/securitygroup/v1alpha1"
 	securitygrouprulev1alpha1 "github.com/peertechde/provider-opentelekomcloud/apis/securitygrouprule/v1alpha1"
@@ -20,6 +21,7 @@ func init() {
 		subnetv1alpha1.SchemeBuilder.AddToScheme,
 		securitygroupv1alpha1.SchemeBuilder.AddToScheme,
 		securitygrouprulev1alpha1.SchemeBuilder.AddToScheme,
+		elasticipv1alpha1.SchemeBuilder.AddToScheme,
 		natgatewayv1alpha1.SchemeBuilder.AddToScheme,
 	)
 }

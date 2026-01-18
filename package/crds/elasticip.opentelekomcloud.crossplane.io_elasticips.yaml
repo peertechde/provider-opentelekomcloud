@@ -4,18 +4,18 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  name: securitygroups.securitygroup.opentelekomcloud.crossplane.io
+  name: elasticips.elasticip.opentelekomcloud.crossplane.io
 spec:
-  group: securitygroup.opentelekomcloud.crossplane.io
+  group: elasticip.opentelekomcloud.crossplane.io
   names:
     categories:
     - crossplane
     - managed
     - opentelekomcloud
-    kind: SecurityGroup
-    listKind: SecurityGroupList
-    plural: securitygroups
-    singular: securitygroup
+    kind: ElasticIP
+    listKind: ElasticIPList
+    plural: elasticips
+    singular: elasticip
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
@@ -28,8 +28,11 @@ spec:
     - jsonPath: .status.atProvider.id
       name: ID
       type: string
-    - jsonPath: .spec.forProvider.name
-      name: NAME
+    - jsonPath: .status.atProvider.ipAddress
+      name: IP
+      type: string
+    - jsonPath: .status.atProvider.status
+      name: STATUS
       type: string
     - jsonPath: .metadata.creationTimestamp
       name: AGE
@@ -37,7 +40,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: SecurityGroup is the Schema for the SecurityGroups.
+        description: ElasticIP is the Schema for the Elastic IP.
         properties:
           apiVersion:
             description: |-
@@ -57,26 +60,58 @@ spec:
           metadata:
             type: object
           spec:
-            description: A SecurityGroupSpec defines the desired state of a SecurityGroup.
+            description: A ElasticIPSpec defines the desired state of a ElasticIP.
             properties:
               forProvider:
-                description: SecurityGroupParameters are the configurable fields of
-                  a SecurityGroup.
+                description: ElasticIPParameters are the configurable fields of a
+                  ElasticIP.
                 properties:
-                  description:
-                    description: Description provides supplementary information about
-                      the SecurityGroup.
-                    maxLength: 255
-                    type: string
-                  name:
-                    description: |-
-                      Name is the name of the SecurityGroup. The name must be unique for a
-                      tenant. The value is a string of no more than 64 characters and can
-                      contain digits, letters, underscores (_), and hyphens (-).
-                    maxLength: 64
-                    type: string
+                  bandwidth:
+                    description: Bandwidth specifies the bandwidth configuration.
+                    properties:
+                      shareType:
+                        description: |-
+                          ShareType specifies the bandwidth share type.
+                          Valid values are "Dedicated" and "Shared".
+                        enum:
+                        - Dedicated
+                        - Shared
+                        type: string
+                        x-kubernetes-validations:
+                        - message: ShareType is immutable
+                          rule: self == oldSelf
+                      size:
+                        description: Size specifies the bandwidth size.
+                        minimum: 1
+                        type: integer
+                        x-kubernetes-validations:
+                        - message: Size is immutable
+                          rule: self == oldSelf
+                    required:
+                    - shareType
+                    - size
+                    type: object
+                  publicIP:
+                    description: PublicIP specifies the public IP configuration.
+                    properties:
+                      ipAddress:
+                        description: IPAddress specifies the EIP address.
+                        type: string
+                      type:
+                        description: Type specifies the EIP type.
+                        enum:
+                        - BGP
+                        - Mail
+                        type: string
+                        x-kubernetes-validations:
+                        - message: Type is immutable
+                          rule: self == oldSelf
+                    required:
+                    - type
+                    type: object
                 required:
-                - name
+                - bandwidth
+                - publicIP
                 type: object
               managementPolicies:
                 default:
@@ -137,18 +172,36 @@ spec:
             - forProvider
             type: object
           status:
-            description: A SecurityGroupStatus represents the observed state of a
-              SecurityGroup.
+            description: A ElasticIPStatus represents the observed state of a ElasticIP.
             properties:
               atProvider:
-                description: SecurityGroupObservation are the observable fields of
-                  a SecurityGroup.
+                description: ElasticIPObservation are the observable fields of a ElasticIP.
                 properties:
+                  bandwidthId:
+                    description: BandwidthID is the ID of the bandwidth associated
+                      with the EIP.
+                    type: string
+                  bandwidthShareType:
+                    description: BandwidthShareType is the share type of the bandwidth.
+                    type: string
+                  bandwidthSize:
+                    description: BandwidthSize is the size of the bandwidth.
+                    type: integer
                   id:
-                    description: ID is the unique identifier of the SecurityGroup.
+                    description: ID is the unique identifier of the ElasticIP.
+                    type: string
+                  ipAddress:
+                    description: IPAddress is the actual EIP address.
+                    type: string
+                  portId:
+                    description: PortID is the port ID bound to the EIP.
+                    type: string
+                  privateIpAddress:
+                    description: PrivateIPAddress is the private IP address bound
+                      to the EIP.
                     type: string
                   status:
-                    description: Status indicates the current status of the SecurityGroup.
+                    description: Status indicates the current status of the ElasticIP.
                     type: string
                 type: object
               conditions:
