@@ -35,9 +35,16 @@ type Client struct {
 	Region         string
 }
 
-// NewNetworkV1Client creates a client for VPC/Subnet service.
+// NewNetworkV1Client creates a client for Network V1 service.
 func (c *Client) NewNetworkV1Client() (*golangsdk.ServiceClient, error) {
 	return openstack.NewNetworkV1(c.ProviderClient, golangsdk.EndpointOpts{
+		Region: c.Region,
+	})
+}
+
+// NewNetworkV2Client creates a client for Network V2 service.
+func (c *Client) NewNetworkV2Client() (*golangsdk.ServiceClient, error) {
+	return openstack.NewNetworkV2(c.ProviderClient, golangsdk.EndpointOpts{
 		Region: c.Region,
 	})
 }
