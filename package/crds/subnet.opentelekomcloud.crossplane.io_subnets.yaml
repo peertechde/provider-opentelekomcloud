@@ -43,7 +43,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Subnet is the Schema for the Subnets API.
+        description: Subnet is the Schema for the Subnets.
         properties:
           apiVersion:
             description: |-
@@ -269,12 +269,11 @@ spec:
                   id:
                     description: ID is the unique identifier of the Subnet.
                     type: string
-                  networkId:
-                    description: NetworkID is the ID of the Neutron network associated
-                      with the Subnet.
-                    type: string
                   status:
                     description: Status indicates the current status of the Subnet.
+                    type: string
+                  vpcId:
+                    description: VPCID is the actual VPC ID of the Subnet.
                     type: string
                 required:
                 - gatewayIp

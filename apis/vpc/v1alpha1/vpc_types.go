@@ -57,7 +57,7 @@ type VPCStatus struct {
 
 // +kubebuilder:object:root=true
 
-// VPC is the Schema for the VPC API.
+// VPC is the Schema for the VPC.
 // +kubebuilder:printcolumn:name="READY",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="SYNCED",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.atProvider.id"

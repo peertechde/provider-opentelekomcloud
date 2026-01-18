@@ -40,7 +40,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: VPC is the Schema for the VPC API.
+        description: VPC is the Schema for the VPC.
         properties:
           apiVersion:
             description: |-

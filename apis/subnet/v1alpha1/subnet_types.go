@@ -70,14 +70,14 @@ type SubnetObservation struct {
 	// Status indicates the current status of the Subnet.
 	Status string `json:"status,omitempty"`
 
-	// NetworkID is the ID of the Neutron network associated with the Subnet.
-	NetworkID string `json:"networkId,omitempty"`
-
 	// CIDR is the actual CIDR block of the Subnet.
 	CIDR string `json:"cidr,omitempty"`
 
 	// GatewayIP is the actual gateway address of the Subnet.
 	GatewayIP string `json:"gatewayIp"`
+
+	// VPCID is the actual VPC ID of the Subnet.
+	VPCID string `json:"vpcId,omitempty"`
 }
 
 // A SubnetSpec defines the desired state of a Subnet.
@@ -94,7 +94,7 @@ type SubnetStatus struct {
 
 // +kubebuilder:object:root=true
 
-// Subnet is the Schema for the Subnets API.
+// Subnet is the Schema for the Subnets.
 // +kubebuilder:printcolumn:name="READY",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="SYNCED",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.atProvider.id"
