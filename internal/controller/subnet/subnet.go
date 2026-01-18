@@ -199,10 +199,10 @@ func (e *external) Observe(
 
 	// Update observed state
 	cr.Status.AtProvider = v1alpha1.SubnetObservation{
-		ID:        subnet.ID,
-		Status:    subnet.Status,
-		NetworkID: subnet.NetworkID,
-		CIDR:      subnet.CIDR,
+		ID:     subnet.ID,
+		Status: subnet.Status,
+		CIDR:   subnet.CIDR,
+		VPCID:  subnet.VpcID,
 	}
 
 	// Set conditions based on status
@@ -333,6 +333,10 @@ func (e *external) Update(
 		return managed.ExternalUpdate{}, errors.New(errNotSubnet)
 	}
 
+	// Verify immutable fields
+	if cr.Spec.ForProvider.VPCID != cr.Status.AtProvider.VPCID {
+		return managed.ExternalUpdate{}, errors.New("cannot update immutable field: VPCID")
+	}
 	if cr.Spec.ForProvider.CIDR != cr.Status.AtProvider.CIDR {
 		return managed.ExternalUpdate{}, errors.New("cannot update immutable field: CIDR")
 	}

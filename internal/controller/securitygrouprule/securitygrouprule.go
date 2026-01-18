@@ -35,6 +35,7 @@ const (
 	errObserve              = "cannot observe SecurityGroupRule"
 	errCreate               = "cannot create SecurityGroupRule"
 	errDelete               = "cannot delete SecurityGroupRule"
+	errImmutable            = "SecurityGroupRule is immutable"
 )
 
 // SetupGated adds a controller that reconciles SecurityGroupRule managed resources with safe-start support.
@@ -201,7 +202,8 @@ func (e *external) Observe(
 
 	// Update observed state
 	cr.Status.AtProvider = v1alpha1.SecurityGroupRuleObservation{
-		ID: rule.ID,
+		ID:              rule.ID,
+		SecurityGroupID: rule.SecurityGroupID,
 	}
 
 	// Set conditions
@@ -370,10 +372,9 @@ func (e *external) Update(
 	ctx context.Context,
 	mg resource.Managed,
 ) (managed.ExternalUpdate, error) {
-	// Security Group Rules are generally immutable. We return an error if drift
-	// is detected because we cannot update the resource. The user must recreate
-	// the resource.
-	return managed.ExternalUpdate{}, errors.New("SecurityGroupRule is immutable")
+	// Security Group Rules are immutable. Any detected drift requires
+	// recreation, so we return an error.
+	return managed.ExternalUpdate{}, errors.New(errImmutable)
 }
 
 func (e *external) Delete(

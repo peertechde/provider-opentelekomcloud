@@ -95,6 +95,9 @@ type SecurityGroupRuleParameters struct {
 type SecurityGroupRuleObservation struct {
 	// ID is the unique identifier of the SecurityGroupRule.
 	ID string `json:"id,omitempty"`
+
+	// SecurityGroupID is the actual SecurityGroupID of the SecurityGroupRule.
+	SecurityGroupID string `json:"securityGroupId,omitempty"`
 }
 
 // A SecurityGroupRuleSpec defines the desired state of a SecurityGroupRule.
@@ -111,7 +114,7 @@ type SecurityGroupRuleStatus struct {
 
 // +kubebuilder:object:root=true
 
-// SecurityGroupRule is the Schema for the SecurityGroupRules API.
+// SecurityGroupRule is the Schema for the SecurityGroupRules.
 // +kubebuilder:printcolumn:name="READY",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="SYNCED",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.atProvider.id"
