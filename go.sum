@@ -111,8 +111,8 @@ github.com/onsi/ginkgo/v2 v2.22.0 h1:Yed107/8DjTr0lKCNt7Dn8yQ6ybuDRQoMGrNFKzMfHg
 github.com/onsi/ginkgo/v2 v2.22.0/go.mod h1:7Du3c42kxCUegi0IImZ1wUQzMBVecgIHjR1C+NkhLQo=
 github.com/onsi/gomega v1.37.0 h1:CdEG8g0S133B4OswTDC/5XPSzE1OeP29QOioj2PID2Y=
 github.com/onsi/gomega v1.37.0/go.mod h1:8D9+Txp43QWKhM24yyOBEdpkzN8FvJyAwecBgsU4KU0=
-github.com/opentelekomcloud/gophertelekomcloud v0.9.5 h1:wJMqv0xU6CcTVZAWVw2qig1j/hn7+5eulpF0A7LGWo0=
-github.com/opentelekomcloud/gophertelekomcloud v0.9.5/go.mod h1:la8cQVYopRoEbNe2L7HlGTdLxUQOwIqHp1VHtjE/5qA=
+github.com/opentelekomcloud/gophertelekomcloud v0.9.6-0.20251030095415-8c677871c594 h1:PwGbgY3kuoBpZkg+tpc+eG5x/1HMu98J2NzkkMVy0XI=
+github.com/opentelekomcloud/gophertelekomcloud v0.9.6-0.20251030095415-8c677871c594/go.mod h1:la8cQVYopRoEbNe2L7HlGTdLxUQOwIqHp1VHtjE/5qA=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
