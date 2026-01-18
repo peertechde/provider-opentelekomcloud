@@ -4,18 +4,18 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  name: securitygrouprules.securitygrouprule.opentelekomcloud.crossplane.io
+  name: snatrules.snatrule.opentelekomcloud.crossplane.io
 spec:
-  group: securitygrouprule.opentelekomcloud.crossplane.io
+  group: snatrule.opentelekomcloud.crossplane.io
   names:
     categories:
     - crossplane
     - managed
     - opentelekomcloud
-    kind: SecurityGroupRule
-    listKind: SecurityGroupRuleList
-    plural: securitygrouprules
-    singular: securitygrouprule
+    kind: SNATRule
+    listKind: SNATRuleList
+    plural: snatrules
+    singular: snatrule
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
@@ -28,11 +28,14 @@ spec:
     - jsonPath: .status.atProvider.id
       name: ID
       type: string
-    - jsonPath: .spec.forProvider.direction
-      name: DIRECTION
+    - jsonPath: .status.atProvider.status
+      name: STATUS
       type: string
-    - jsonPath: .spec.forProvider.protocol
-      name: PROTOCOL
+    - jsonPath: .spec.forProvider.natGatewayId
+      name: GATEWAY-ID
+      type: string
+    - jsonPath: .status.atProvider.elasticIpAddress
+      name: PUBLIC-IP
       type: string
     - jsonPath: .metadata.creationTimestamp
       name: AGE
@@ -40,7 +43,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: SecurityGroupRule is the Schema for the SecurityGroupRules.
+        description: A SNATRule is the Schema for the SNAT Rule.
         properties:
           apiVersion:
             description: |-
@@ -60,82 +63,21 @@ spec:
           metadata:
             type: object
           spec:
-            description: A SecurityGroupRuleSpec defines the desired state of a SecurityGroupRule.
+            description: A SNATRuleSpec defines the desired state of a SNATRule.
             properties:
               forProvider:
-                description: SecurityGroupRuleParameters are the configurable fields
-                  of a SecurityGroupRule.
+                description: SNATRuleParameters are the configurable fields of a SNATRule.
                 properties:
-                  action:
+                  cidr:
                     description: |-
-                      Action specifies the action of the rule.
-                      Valid values are "allow" and "deny".
-                    enum:
-                    - allow
-                    - deny
+                      CIDR is the CIDR block this SNAT rule connects to.
+                      Either SubnetID or CIDR must be specified.
                     type: string
                     x-kubernetes-validations:
-                    - message: Action is immutable
+                    - message: CIDR is immutable
                       rule: self == oldSelf
-                  description:
-                    description: Description specifies the description of the rule.
-                    type: string
-                  direction:
-                    description: Direction specifies whether the rule applies to ingress
-                      or egress traffic.
-                    enum:
-                    - ingress
-                    - egress
-                    type: string
-                    x-kubernetes-validations:
-                    - message: Direction is immutable
-                      rule: self == oldSelf
-                  ethertype:
-                    description: |-
-                      Ethertype specifies the IP version.
-                      Valid values are "IPv4" and "IPv6".
-                    enum:
-                    - IPv4
-                    - IPv6
-                    type: string
-                    x-kubernetes-validations:
-                    - message: Ethertype is immutable
-                      rule: self == oldSelf
-                  multiport:
-                    description: Multiport specifies the port or port range (e.g.,
-                      "80", "80-90").
-                    type: string
-                    x-kubernetes-validations:
-                    - message: Multiport is immutable
-                      rule: self == oldSelf
-                  priority:
-                    description: Priority specifies the priority of the rule.
-                    type: integer
-                    x-kubernetes-validations:
-                    - message: Priority is immutable
-                      rule: self == oldSelf
-                  protocol:
-                    description: Protocol specifies the network protocol.
-                    type: string
-                    x-kubernetes-validations:
-                    - message: Protocol is immutable
-                      rule: self == oldSelf
-                  remoteAddressGroupId:
-                    description: RemoteAddressGroupID is the ID of the remote address
-                      group.
-                    type: string
-                    x-kubernetes-validations:
-                    - message: RemoteAddressGroupID is immutable
-                      rule: self == oldSelf
-                  remoteGroupId:
-                    description: RemoteGroupID specifies the ID of the remote security
-                      group.
-                    type: string
-                    x-kubernetes-validations:
-                    - message: RemoteGroupID is immutable
-                      rule: self == oldSelf
-                  remoteGroupIdRef:
-                    description: RemoteGroupIDRef references a SecurityGroup to retrieve
+                  elasticIPIDRef:
+                    description: ElasticIPIDRef references a ElasticIP to retrieve
                       its ID.
                     properties:
                       name:
@@ -172,8 +114,8 @@ spec:
                     required:
                     - name
                     type: object
-                  remoteGroupIdSelector:
-                    description: RemoteGroupIDSelector selects a reference to a SecurityGroup.
+                  elasticIPIDSelector:
+                    description: ElasticIPIDSelector selects a reference to a NATGateway.
                     properties:
                       matchControllerRef:
                         description: |-
@@ -215,23 +157,23 @@ spec:
                             type: string
                         type: object
                     type: object
-                  remoteIpPrefix:
-                    description: RemoteIPPrefix specifies the remote IP prefix (CIDR).
+                  elasticIpId:
+                    description: ElasticIPID is the ID of the Elastic IP (Public IP)
+                      used for SNAT.
                     type: string
                     x-kubernetes-validations:
-                    - message: RemoteIPPrefix is immutable
+                    - message: ElasticIPID is immutable
                       rule: self == oldSelf
-                  securityGroupId:
-                    description: |-
-                      SecurityGroupID is the ID of the security group to which the
-                      SecurityGroupRule belongs.
+                  natGatewayId:
+                    description: NATGatewayID is the ID of the NAT Gateway to which
+                      this SNAT rule belongs.
                     type: string
                     x-kubernetes-validations:
-                    - message: SecurityGroupID is immutable
+                    - message: NATGatewayID is immutable
                       rule: self == oldSelf
-                  securityGroupIdRef:
-                    description: SecurityGroupIDRef references a SecurityGroup to
-                      retrieve its ID.
+                  natGatewayIdRef:
+                    description: NATGatewayIDRef references a NATGateway to retrieve
+                      its ID.
                     properties:
                       name:
                         description: Name of the referenced object.
@@ -267,9 +209,8 @@ spec:
                     required:
                     - name
                     type: object
-                  securityGroupIdSelector:
-                    description: SecurityGroupIDSelector selects a reference to a
-                      SecurityGroup.
+                  natGatewayIdSelector:
+                    description: NATGatewayIDSelector selects a reference to a NATGateway.
                     properties:
                       matchControllerRef:
                         description: |-
@@ -311,8 +252,97 @@ spec:
                             type: string
                         type: object
                     type: object
+                  subnetIDRef:
+                    description: SubnetIDRef references a Subnet to retrieve its ID.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      namespace:
+                        description: Namespace of the referenced object
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  subnetIDSelector:
+                    description: SubnetIDSelector selects a reference to a NATGateway.
+                    properties:
+                      matchControllerRef:
+                        description: |-
+                          MatchControllerRef ensures an object with the same controller reference
+                          as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      namespace:
+                        description: Namespace for the selector
+                        type: string
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  subnetId:
+                    description: |-
+                      SubnetID is the ID of the Subnet this SNAT rule connects to.
+                      Either SubnetID or CIDR must be specified.
+                    type: string
+                    x-kubernetes-validations:
+                    - message: SubnetID is immutable
+                      rule: self == oldSelf
                 required:
-                - direction
+                - elasticIpId
+                - natGatewayId
                 type: object
               managementPolicies:
                 default:
@@ -373,20 +403,38 @@ spec:
             - forProvider
             type: object
           status:
-            description: A SecurityGroupRuleStatus represents the observed state of
-              a SecurityGroupRule.
+            description: A SNATRuleStatus represents the observed state of a SNATRule.
             properties:
               atProvider:
-                description: SecurityGroupRuleObservation are the observable fields
-                  of a SecurityGroupRule.
+                description: SNATRuleObservation are the observable fields of a SNATRule.
                 properties:
+                  adminStateUp:
+                    description: AdminStateUp indicates whether the SNAT rule is enabled.
+                    type: boolean
+                  elasticIpAddress:
+                    description: ElasticIPAddress is the actual IP address of the
+                      elastic IP.
+                    type: string
+                  elasticIpId:
+                    description: ElasticIPID is the actual ElasticIP ID of the SNAT
+                      Rule.
+                    type: string
                   id:
-                    description: ID is the unique identifier of the SecurityGroupRule.
+                    description: ID is the unique identifier of the SNAT rule.
                     type: string
-                  securityGroupId:
-                    description: SecurityGroupID is the actual SecurityGroupID of
-                      the SecurityGroupRule.
+                  natGatewayId:
+                    description: NATGatewayID is the actual NATGateway ID of the SNAT
+                      Rule.
                     type: string
+                  status:
+                    description: Status indicates the current status of the SNAT rule.
+                    type: string
+                  subnetId:
+                    description: SubnetID is the actual Subnet ID of the SNAT Rule.
+                    type: string
+                required:
+                - elasticIpId
+                - natGatewayId
                 type: object
               conditions:
                 description: Conditions of the resource.
@@ -445,6 +493,11 @@ spec:
         required:
         - spec
         type: object
+        x-kubernetes-validations:
+        - message: Either subnetId or cidr must be specified
+          rule: has(self.spec.forProvider.subnetId) || has(self.spec.forProvider.cidr)
+        - message: Cannot specify both subnetId and cidr
+          rule: '!(has(self.spec.forProvider.subnetId) && has(self.spec.forProvider.cidr))'
     served: true
     storage: true
     subresources:
