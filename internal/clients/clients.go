@@ -42,6 +42,13 @@ func (c *Client) NewNetworkV1Client() (*golangsdk.ServiceClient, error) {
 	})
 }
 
+// NewVPCV3Client creates a client for VPC V3 service.
+func (c *Client) NewVPCV3Client() (*golangsdk.ServiceClient, error) {
+	return openstack.NewVpcV3(c.ProviderClient, golangsdk.EndpointOpts{
+		Region: c.Region,
+	})
+}
+
 // session holds an active connection and metadata.
 type session struct {
 	client    *golangsdk.ProviderClient
